@@ -2,6 +2,9 @@ package com.xiehang.miaosha.service;
 
 import java.util.Date;
 
+import com.xiehang.miaosha.redis.OrderKey;
+import com.xiehang.miaosha.redis.RedisService;
+import com.xiehang.miaosha.vo.OrderDetailVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,9 +20,13 @@ public class OrderService {
 	
 	@Autowired
 	OrderDao orderDao;
-	
+
+	@Autowired
+	RedisService redisService;
+
 	public MiaoshaOrder getMiaoshaOrderByUserIdGoodsId(long userId, long goodsId) {
-		return orderDao.getMiaoshaOrderByUserIdGoodsId(userId, goodsId);
+		//return orderDao.getMiaoshaOrderByUserIdGoodsId(userId, goodsId);
+		return redisService.get(OrderKey.getMiaoshaOrderByUidGid, ""+userId+"_"+goodsId, MiaoshaOrder.class);
 	}
 
 	@Transactional
@@ -40,7 +47,12 @@ public class OrderService {
 		miaoshaOrder.setOrderId(orderId);
 		miaoshaOrder.setUserId(user.getId());
 		orderDao.insertMiaoshaOrder(miaoshaOrder);
+		// 存到缓存中
+		redisService.set(OrderKey.getMiaoshaOrderByUidGid, ""+user.getId()+"_"+goods.getId(), miaoshaOrder);
 		return orderInfo;
 	}
-	
+
+	public OrderInfo getOrderById(long orderId) {
+		return orderDao.getOrderById(orderId);
+	}
 }

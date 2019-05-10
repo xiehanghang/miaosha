@@ -14,7 +14,8 @@ public class GoodsService {
 	
 	@Autowired
 	GoodsDao goodsDao;
-	
+
+
 	public List<GoodsVo> listGoodsVo(){
 		return goodsDao.listGoodsVo();
 	}
